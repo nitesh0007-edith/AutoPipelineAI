@@ -48,11 +48,10 @@ graph TD;
     QA --> Output;
     Profiler --> Output;
 
-
+```
 
 ## 🗂️ Phase-Wise Progress
 
----
 ### ✅ Phase 1: Initialization
 - Project bootstrapped with virtual environment and modular folders  
 - Basic CLI + Streamlit setup for interaction
