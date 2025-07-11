@@ -78,6 +78,12 @@ if interface_mode == "Manual Mode: Filter + Dashboard":
 # 🤖 LLM Mode: Only visible if selected
 elif interface_mode == "LLM Mode: Smart Querying (Private LLM)":
     with st.expander("🧠 LLM-Powered Smart Querying", expanded=True):
+        import openai
+        import json
+
+        # Set up OpenAI API for Ollama
+        openai.api_base = "http://localhost:11434/v1"
+        openai.api_key = "ollama"
 
         st.markdown("## 🤖 Ask Questions About Your Data")
 
@@ -111,7 +117,7 @@ elif interface_mode == "LLM Mode: Smart Querying (Private LLM)":
                 st.error(f"❌ Error reading file: {e}")
         # ✅ File Upload Block Ends Here
 
-        # You can now place the query input below this section:
+        # 🧠 Natural Language Input for Questions
         st.markdown("""
         Type a natural language question below.  
         **Example:**
@@ -119,4 +125,41 @@ elif interface_mode == "LLM Mode: Smart Querying (Private LLM)":
         - *Show total profit by region between Jan 2020 and Jun 2020*
         """)
         user_query = st.text_input("🔎 Ask your question:", placeholder="e.g., What are the top 5 profitable categories in 2016?")
+
+        if st.button("💡 Generate Insight") and user_query:
+            if "user_uploaded_df" in st.session_state:
+                df = st.session_state["user_uploaded_df"]
+                df_sample = df.head(10).to_dict(orient="records")
+
+                prompt = f"""
+You are a smart data assistant. Analyze the uploaded dataset and answer the user's question.
+
+User Question: {user_query}
+
+Here are the first 10 rows of the dataset:
+{json.dumps(df_sample)}
+"""
+
+                with st.spinner("🤖 Thinking with LLM..."):
+                    try:
+                        client = openai.OpenAI(
+                                    base_url="http://localhost:11434/v1",
+                                    api_key="ollama"
+                                            )
+                        response = client.chat.completions.create(
+                                    model="llama3",
+                                    messages=[
+                                            {"role": "system", "content": "You are a helpful assistant that analyzes tabular data and answers in markdown format."},
+                                            {"role": "user", "content": prompt}
+                                        ],
+                                    temperature=0.4
+            )   
+                        answer = response.choices[0].message.content
+                        st.markdown("### 🧠 LLM Insight")
+                        st.markdown(answer)
+                    except Exception as e:
+                        st.error(f"❌ LLM Error: {e}")
+            else:
+                st.warning("📂 Please upload a dataset first.")
+
 
