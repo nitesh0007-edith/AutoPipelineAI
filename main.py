@@ -1,5 +1,7 @@
 import streamlit as st
 import pandas as pd
+import os
+import shutil
 from datetime import datetime
 from src.etl.load_superstore import load_and_clean_superstore, save_clean_data, filter_data
 from src.utils.profiling import generate_profile
@@ -76,23 +78,45 @@ if interface_mode == "Manual Mode: Filter + Dashboard":
 # 🤖 LLM Mode: Only visible if selected
 elif interface_mode == "LLM Mode: Smart Querying (Private LLM)":
     with st.expander("🧠 LLM-Powered Smart Querying", expanded=True):
+
         st.markdown("## 🤖 Ask Questions About Your Data")
+
+        # ✅ File Upload Block Starts Here
+        st.markdown("---")
+        st.subheader("📂 Upload Your Data")
+        uploaded_file = st.file_uploader("Upload a CSV or Excel file", type=["csv", "xlsx"])
+
+        if uploaded_file is not None:
+            file_name = uploaded_file.name
+            save_path = os.path.join("input_docs", file_name)
+
+            # Save or overwrite
+            with open(save_path, "wb") as f:
+                f.write(uploaded_file.getbuffer())
+            st.success(f"✅ File '{file_name}' saved to input_docs/")
+
+            # Preview the uploaded file
+            try:
+                if file_name.endswith(".csv"):
+                    try:
+                        df = pd.read_csv(save_path, encoding="utf-8")
+                    except UnicodeDecodeError:
+                        df = pd.read_csv(save_path, encoding="latin1")  # fallback for Excel-exported CSVs
+                elif file_name.endswith(".xlsx"):
+                    df = pd.read_excel(save_path)
+
+                st.dataframe(df.head(10), use_container_width=True)
+                st.session_state["user_uploaded_df"] = df
+            except Exception as e:
+                st.error(f"❌ Error reading file: {e}")
+        # ✅ File Upload Block Ends Here
+
+        # You can now place the query input below this section:
         st.markdown("""
         Type a natural language question below.  
-        Example:  
-        - *Top 10 products by sales in California in 2020*  
+        **Example:**
+        - *Top 10 products by sales in California in 2020*
         - *Show total profit by region between Jan 2020 and Jun 2020*
         """)
-
-        user_query = st.text_input("🔍 Ask your question:", placeholder="e.g., What are the top 5 profitable categories in 2016?")
-
-        if user_query:
-            st.info("⏳ Thinking... (Querying Local LLM)")
-            
-            # Placeholder for now: next step we’ll add LLM integration
-            # Replace this with local LLM call in next step
-            fake_answer = "🔎 Top 5 profitable categories in 2016:\n1. Phones\n2. Chairs\n3. Copiers\n4. Storage\n5. Tables"
-            st.success(fake_answer)
-
-            # Optionally: You can add generated chart later too
+        user_query = st.text_input("🔎 Ask your question:", placeholder="e.g., What are the top 5 profitable categories in 2016?")
 
