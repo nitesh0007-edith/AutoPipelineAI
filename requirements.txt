@@ -1,0 +1,13 @@
+openai
+langchain
+langgraph
+crewai
+pandas
+python-dotenv
+pypdf
+pdfplumber
+streamlit
+pillow
+tiktoken
+watchdog
+loguru
