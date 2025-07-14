@@ -118,6 +118,12 @@ elif interface_mode == "LLM Mode: Smart Querying (Private LLM)":
         # ✅ File Upload Block Ends Here
 
         # 🧠 Natural Language Input for Questions
+        # 🔀 Model Selector (llama3, mistral, phi3)
+        st.markdown("---")
+        st.subheader("🧠 Select Local LLM Model")
+        llm_model = st.selectbox("Choose a local model", options=["llama3", "mistral","phi3"], index=0)
+
+        # 🧠 Natural Language Input for Questions
         st.markdown("""
         Type a natural language question below.  
         **Example:**
@@ -129,37 +135,51 @@ elif interface_mode == "LLM Mode: Smart Querying (Private LLM)":
         if st.button("💡 Generate Insight") and user_query:
             if "user_uploaded_df" in st.session_state:
                 df = st.session_state["user_uploaded_df"]
-                df_sample = df.head(10).to_dict(orient="records")
+                df_sample_csv = df.head(10).to_csv(index=False)
 
                 prompt = f"""
-You are a smart data assistant. Analyze the uploaded dataset and answer the user's question.
+        You are a smart data assistant. Analyze this dataset and answer the user's question.
 
-User Question: {user_query}
+        User Question: {user_query}
 
-Here are the first 10 rows of the dataset:
-{json.dumps(df_sample)}
-"""
+        Here are the first 10 rows of the dataset (CSV format):
+        {df_sample_csv}
+        """
 
                 with st.spinner("🤖 Thinking with LLM..."):
                     try:
+                        import openai
+                        openai.api_base = "http://localhost:11434/v1"
+                        openai.api_key = "ollama"
+
                         client = openai.OpenAI(
-                                    base_url="http://localhost:11434/v1",
-                                    api_key="ollama"
-                                            )
+                            base_url="http://localhost:11434/v1",
+                            api_key="ollama"
+                        )
+
+                        # 🔄 Stream the response from selected model
                         response = client.chat.completions.create(
-                                    model="llama3",
-                                    messages=[
-                                            {"role": "system", "content": "You are a helpful assistant that analyzes tabular data and answers in markdown format."},
-                                            {"role": "user", "content": prompt}
-                                        ],
-                                    temperature=0.4
-            )   
-                        answer = response.choices[0].message.content
+                            model=llm_model,
+                            messages=[
+                                {"role": "system", "content": "You are a helpful assistant that analyzes tabular data and answers in markdown format."},
+                                {"role": "user", "content": prompt}
+                            ],
+                            temperature=0.4,
+                            stream=True
+                        )
+
                         st.markdown("### 🧠 LLM Insight")
-                        st.markdown(answer)
+                        full_response = ""
+                        response_placeholder = st.empty()
+
+                        for chunk in response:
+                            token = chunk.choices[0].delta.content if chunk.choices[0].delta else ""
+                            full_response += token or ""
+                            response_placeholder.markdown(full_response)
+
                     except Exception as e:
                         st.error(f"❌ LLM Error: {e}")
             else:
                 st.warning("📂 Please upload a dataset first.")
 
-
+        
