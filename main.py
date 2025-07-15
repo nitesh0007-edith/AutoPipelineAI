@@ -187,15 +187,22 @@ elif interface_mode == "LLM Mode: Smart Querying (Private LLM)":
                             code_str = match.group(1).strip()
                             st.markdown("### ⚙️ Executed Output")
                             try:
-                                local_vars = {"df": df}
-                                exec(code_str, {}, local_vars)
-                                result = local_vars.get("result")  # expect result stored in variable `result`
-                                if result is not None:
-                                    st.dataframe(result)
+                                local_vars = {}
+                                exec(code_str, {"df": df}, local_vars)
+                                result = local_vars.get("result")
+
+                                # 📊 Display depending on type
+                                if isinstance(result, pd.DataFrame):
+                                    st.dataframe(result, use_container_width=True)
+                                elif isinstance(result, (list, tuple)):
+                                    st.write(result)
+                                elif isinstance(result, (str, int, float)):
+                                    st.success(f"✅ Result: **{result}**")
                                 else:
-                                    st.warning("✅ Code executed, but no 'result' variable was found.")
-                            except Exception as ex:
-                                st.error(f"❌ Error running code: {ex}")
+                                    st.warning("⚠️ The result was computed but is not displayable.")
+                            except Exception as e:
+                                st.error(f"❌ Error running code: {e}")
+
                         else:
                             st.warning("⚠️ No valid Python code block was found in the response.")
 
