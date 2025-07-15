@@ -136,15 +136,24 @@ elif interface_mode == "LLM Mode: Smart Querying (Private LLM)":
             if "user_uploaded_df" in st.session_state:
                 df = st.session_state["user_uploaded_df"]
                 df_sample_csv = df.head(10).to_csv(index=False)
+                column_names = ", ".join(df.columns)
 
                 prompt = f"""
-        You are a smart data assistant. Analyze this dataset and answer the user's question.
+                            You are a helpful data assistant. Analyze the following tabular data and answer the user's question.
 
-        User Question: {user_query}
+                            Available columns in the dataset:
+                            {column_names}
 
-        Here are the first 10 rows of the dataset (CSV format):
-        {df_sample_csv}
-        """
+                            Use the DataFrame `df` already loaded in memory. Do NOT use `pd.read_csv`.
+
+                            Here are the first 10 rows of the dataset (CSV format):
+                            {df_sample_csv}
+
+                            User's Question:
+                            {user_query}
+
+                            Give your answer in markdown format. If writing Python code, store the final result in a variable named `result`.
+                        """
 
                 with st.spinner("🤖 Thinking with LLM..."):
                     try:
@@ -157,29 +166,43 @@ elif interface_mode == "LLM Mode: Smart Querying (Private LLM)":
                             api_key="ollama"
                         )
 
-                        # 🔄 Stream the response from selected model
                         response = client.chat.completions.create(
                             model=llm_model,
                             messages=[
-                                {"role": "system", "content": "You are a helpful assistant that analyzes tabular data and answers in markdown format."},
+                                {"role": "system", "content": "You are a helpful data analyst. Respond with brief insight and Python code (pandas only)."},
                                 {"role": "user", "content": prompt}
                             ],
                             temperature=0.4,
-                            stream=True
+                            stream=False
                         )
 
+                        full_output = response.choices[0].message.content
                         st.markdown("### 🧠 LLM Insight")
-                        full_response = ""
-                        response_placeholder = st.empty()
+                        st.markdown(full_output)
 
-                        for chunk in response:
-                            token = chunk.choices[0].delta.content if chunk.choices[0].delta else ""
-                            full_response += token or ""
-                            response_placeholder.markdown(full_response)
+                        # ✅ Try extracting the code block from markdown
+                        import re
+                        match = re.search(r"```python(.*?)```", full_output, re.DOTALL)
+                        if match:
+                            code_str = match.group(1).strip()
+                            st.markdown("### ⚙️ Executed Output")
+                            try:
+                                local_vars = {"df": df}
+                                exec(code_str, {}, local_vars)
+                                result = local_vars.get("result")  # expect result stored in variable `result`
+                                if result is not None:
+                                    st.dataframe(result)
+                                else:
+                                    st.warning("✅ Code executed, but no 'result' variable was found.")
+                            except Exception as ex:
+                                st.error(f"❌ Error running code: {ex}")
+                        else:
+                            st.warning("⚠️ No valid Python code block was found in the response.")
 
                     except Exception as e:
                         st.error(f"❌ LLM Error: {e}")
             else:
                 st.warning("📂 Please upload a dataset first.")
+
 
         
