@@ -113,43 +113,99 @@
 
 ## 🏗️ Architecture
 
-```mermaid
-graph TB
-    User[User Interface - Streamlit] --> Mode{Mode Selection}
+### System Architecture Diagram
 
-    Mode --> Manual[📊 Manual Mode]
-    Mode --> LLM[🧠 LLM Mode]
-    Mode --> Agent[🤝 Agent Mode]
-    Mode --> PDF[📄 PDF Mode]
-    Mode --> DB[🗄️ Database Mode]
+<div align="center">
 
-    Manual --> ETL[ETL Module]
-    LLM --> Ollama[Ollama Client]
-    Agent --> Orchestrator[Agent Orchestrator]
-    PDF --> PDFExtractor[PDF Extractor]
-    DB --> DBHandlers[DB Handlers]
+![AutoPipelineAI Architecture](./architecture_diagram.png)
 
-    Orchestrator --> ETLAgent[ETL Agent]
-    Orchestrator --> QueryAgent[Query Agent]
-    Orchestrator --> ProfileAgent[Profile Agent]
+**📐 Comprehensive Architecture Documentation Available:**
 
-    Ollama --> CodeExecutor[Safe Code Executor]
-    PDFExtractor --> NER[NER Processor]
+[![Architecture Docs](https://img.shields.io/badge/📐_Architecture-Documentation-blue?style=for-the-badge)](./ARCHITECTURE.md)
+[![PlantUML](https://img.shields.io/badge/📊_PlantUML-Source-green?style=for-the-badge)](./architecture.puml)
+[![PDF Diagram](https://img.shields.io/badge/📄_PDF-Download-red?style=for-the-badge)](./architecture_diagram.pdf)
 
-    ETL --> Cache[Cache Manager]
-    ETLAgent --> Cache
-    QueryAgent --> Cache
+</div>
 
-    Cache --> Memory[Memory Store]
+### Architecture Overview
 
-    DBHandlers --> DuckDB[(DuckDB)]
-    DBHandlers --> SQLite[(SQLite)]
+AutoPipelineAI is built on a **6-layer modular architecture** with clear separation of concerns:
 
-    style User fill:#e1f5ff
-    style Mode fill:#fff3cd
-    style Orchestrator fill:#d4edda
-    style Cache fill:#f8d7da
+<table>
+<tr>
+<td width="50%" valign="top">
+
+**🎨 Layer 1: User Interface**
+- Streamlit web application
+- Interactive dashboard
+- Real-time updates
+- Multi-tab navigation
+
+**🔀 Layer 2: Mode Router**
+- Request routing & dispatch
+- 5 operational modes
+- Smart mode selection
+
+**⚙️ Layer 3: Core Processing**
+- ETL Module (data transformation)
+- Ollama Client (LLM integration)
+- Agent Orchestrator (multi-agent)
+- PDF Extractor (document processing)
+- Database Handlers (analytics & storage)
+
+</td>
+<td width="50%" valign="top">
+
+**🛡️ Layer 4: Support Services**
+- Cache Manager (memory + disk)
+- Memory Store (session state)
+- Configuration (env variables)
+- Security Layer (code sandbox)
+
+**💾 Layer 5: Data Storage**
+- DuckDB (analytics workloads)
+- SQLite (transactional data)
+- Parquet (columnar storage)
+- CSV (universal format)
+
+**🔒 Security Features**
+- Sandboxed code execution
+- Module whitelist
+- Input validation
+- Safety pattern detection
+
+</td>
+</tr>
+</table>
+
+### Data Flow Patterns
+
 ```
+📊 Manual ETL Flow:
+User Input → Manual Mode → ETL Module → Transformation → Storage
+
+🧠 LLM Query Flow:
+Question → LLM Mode → Ollama → Code Generation → Safe Execution → Result
+
+🤝 Agent Workflow:
+Description → Agent Mode → Orchestrator → [Agents] → Execution → Result
+
+📄 PDF Processing:
+PDF Upload → PDF Mode → Extractor → [Text|Tables|NER] → Structured Data
+
+🗄️ Database Analytics:
+SQL Query → DB Mode → Handler → [DuckDB|SQLite] → Results
+```
+
+### Architecture Documentation
+
+| Document | Description | Format |
+|----------|-------------|--------|
+| **[ARCHITECTURE.md](./ARCHITECTURE.md)** | Complete technical documentation with layer details | Markdown |
+| **[architecture.puml](./architecture.puml)** | PlantUML source for regenerating diagrams | PlantUML |
+| **[architecture_diagram.png](./architecture_diagram.png)** | High-resolution architecture diagram (300 DPI) | PNG |
+| **[architecture_diagram.pdf](./architecture_diagram.pdf)** | Vector format for presentations | PDF |
+| **[ARCHITECTURE_FILES_README.md](./ARCHITECTURE_FILES_README.md)** | Guide to using architecture files | Markdown |
 
 ---
 
@@ -306,10 +362,27 @@ After running `streamlit run main_enhanced.py`, open your browser to:
 
 ## 📚 Documentation
 
+### Getting Started
 - **[Quick Start Guide](QUICKSTART.md)** - Get up and running in 5 minutes
 - **[Full Documentation](README_v0.3.md)** - Comprehensive feature documentation
 - **[Upgrade Summary](UPGRADE_SUMMARY.md)** - What's new in v0.3.0
-- **[Configuration Guide](.env.template)** - Environment variables reference
+
+### Architecture
+- **[Architecture Documentation](ARCHITECTURE.md)** - Complete technical architecture guide
+- **[Architecture Diagram (PNG)](architecture_diagram.png)** - High-resolution system diagram
+- **[Architecture Diagram (PDF)](architecture_diagram.pdf)** - Vector format for presentations
+- **[PlantUML Source](architecture.puml)** - Editable diagram source
+- **[Architecture Files Guide](ARCHITECTURE_FILES_README.md)** - How to use architecture files
+
+### Configuration & Setup
+- **[Environment Variables](.env.template)** - Configuration template
+- **[Setup Script](setup.sh)** - Automated installation script
+- **[Requirements](requirements.txt)** - Python dependencies with versions
+
+### Development
+- **[LinkedIn Post Template](LINKEDIN_POST.md)** - Ready-to-use social media content
+- **[Test Suite](tests/)** - Unit tests for all core modules
+- **[Pytest Configuration](pytest.ini)** - Test runner configuration
 
 ---
 
