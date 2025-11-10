@@ -1,0 +1,173 @@
+@startuml AutoPipelineAI Architecture
+!define RECTANGLE class
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle rectangle
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+
+title AutoPipelineAI v0.3.0 - System Architecture
+caption LLM-Driven Agentic Framework for Autonomous ETL and DataOps
+
+' ==================== Layers ====================
+
+package "User Interface Layer" as UI #E3F2FD {
+    component "Streamlit Dashboard" as Streamlit #1976D2
+    note right of Streamlit
+        Interactive Web Application
+        Real-time Updates
+        5 Operational Modes
+    end note
+}
+
+package "Mode Selection & Routing" as Router #FFF3E0 {
+    component "Mode Router" as ModeRouter #F57C00
+
+    component "Manual Mode" as Manual #FFE0B2
+    component "LLM Mode" as LLM #FFE0B2
+    component "Agent Mode" as Agent #FFE0B2
+    component "PDF Mode" as PDF #FFE0B2
+    component "Database Mode" as DB #FFE0B2
+}
+
+package "Core Processing Layer" as Core #E8F5E9 {
+    component "ETL Module" as ETLModule #388E3C {
+        [Data Loading]
+        [Transformation]
+        [Schema Validation]
+    }
+
+    component "Ollama Client" as OllamaClient #D32F2F {
+        [llama3]
+        [mistral]
+        [phi3]
+        [Prompt Templates]
+        [Code Executor]
+    }
+
+    component "Agent Orchestrator" as Orchestrator #00897B {
+        [ETL Agent]
+        [Query Agent]
+        [Profiling Agent]
+        [Task Router]
+    }
+
+    component "PDF Extractor" as PDFExtractor #7B1FA2 {
+        [Text Extraction]
+        [Table Extraction]
+        [NER Processor]
+        [Entity Recognition]
+    }
+
+    component "Database Handlers" as DBHandlers #1976D2 {
+        [DuckDB Handler]
+        [SQLite Handler]
+        [SQL Interface]
+    }
+}
+
+package "Support Services Layer" as Support #FFF8E1 {
+    component "Cache Manager" as Cache #F57C00 {
+        [Memory Cache]
+        [Disk Cache]
+        [TTL Management]
+    }
+
+    component "Memory Store" as Memory #7B1FA2 {
+        [Conversation History]
+        [Session State]
+        [Context Management]
+        [Execution Logs]
+    }
+
+    component "Configuration" as Config #388E3C {
+        [Environment Variables]
+        [Directory Setup]
+        [Settings Management]
+    }
+
+    component "Security Layer" as Security #D32F2F {
+        [Code Sandbox]
+        [Safety Checks]
+        [Module Whitelist]
+        [Input Validation]
+    }
+}
+
+package "Data Storage Layer" as Storage #F3E5F5 {
+    database "DuckDB\nAnalytics" as DuckDB #1976D2
+    database "SQLite\nStorage" as SQLite #388E3C
+    storage "Parquet Files" as Parquet #F57C00
+    storage "CSV Files" as CSV #7B1FA2
+}
+
+' ==================== Relationships ====================
+
+' User Interface Flow
+Streamlit --> ModeRouter : User Request
+
+' Mode Routing
+ModeRouter --> Manual
+ModeRouter --> LLM
+ModeRouter --> Agent
+ModeRouter --> PDF
+ModeRouter --> DB
+
+' Mode to Core
+Manual --> ETLModule : ETL Operations
+LLM --> OllamaClient : Natural Language Query
+Agent --> Orchestrator : Workflow Request
+PDF --> PDFExtractor : Document Processing
+DB --> DBHandlers : SQL Query
+
+' Core to Support
+ETLModule <--> Cache : Cache Data
+OllamaClient <--> Memory : Store Context
+Orchestrator <--> Memory : Track Execution
+PDFExtractor --> Cache : Cache Results
+
+' All Core to Security
+ETLModule --> Security : Validate
+OllamaClient --> Security : Sandbox Code
+Orchestrator --> Security : Check Safety
+
+' Support to Storage
+Cache --> DuckDB : Analytics Cache
+Cache --> Parquet : File Cache
+Memory --> SQLite : Session Data
+DBHandlers --> DuckDB : Query Execution
+DBHandlers --> SQLite : Data Storage
+ETLModule --> CSV : Export Data
+ETLModule --> Parquet : Save Results
+
+' Bidirectional Flows
+Config <--> ETLModule
+Config <--> OllamaClient
+Config <--> DBHandlers
+
+' Notes
+note right of OllamaClient
+    **100% Local Execution**
+    No cloud dependencies
+    Privacy-first design
+end note
+
+note bottom of Storage
+    Multiple storage formats
+    for different use cases
+end note
+
+legend right
+    |= Color |= Component Type |
+    |<#E3F2FD>| User Interface |
+    |<#FFF3E0>| Modes & Router |
+    |<#E8F5E9>| Core Modules |
+    |<#FFEBEE>| LLM Services |
+    |<#E0F2F1>| Agents |
+    |<#FFF8E1>| Support Services |
+    |<#F3E5F5>| Data Storage |
+endlegend
+
+footer AutoPipelineAI v0.3.0 | Built with Python, Streamlit, LangChain, CrewAI, Ollama | Open Source (MIT)
+
+@enduml
