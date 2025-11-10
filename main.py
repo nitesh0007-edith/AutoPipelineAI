@@ -75,7 +75,6 @@ if interface_mode == "Manual Mode: Filter + Dashboard":
 
 # ──────────────────────────────────────────────
 # 🤖 LLM Mode: Only visible if selected
-# 🤖 LLM Mode: Only visible if selected
 elif interface_mode == "LLM Mode: Smart Querying (Private LLM)":
     with st.expander("🧠 LLM-Powered Smart Querying", expanded=True):
         import openai

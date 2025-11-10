@@ -1,13 +1,40 @@
-openai
-langchain
-langgraph
-crewai
-pandas
-python-dotenv
-pypdf
-pdfplumber
-streamlit
-pillow
-tiktoken
-watchdog
-loguru
+# Core LLM & Agent Stack
+openai>=1.12.0
+langchain>=0.1.0
+langchain-community>=0.0.20
+langgraph>=0.0.20
+crewai>=0.11.0
+crewai-tools>=0.2.0
+
+# Data Processing
+pandas>=2.0.0
+pyarrow>=14.0.0
+ydata-profiling>=4.6.0
+
+# Database Support
+duckdb>=0.9.0
+sqlalchemy>=2.0.0
+
+# Document Processing & NER
+pypdf>=3.17.0
+pdfplumber>=0.10.0
+pymupdf>=1.23.0
+spacy>=3.7.0
+
+# Web UI
+streamlit>=1.30.0
+plotly>=5.18.0
+altair>=5.2.0
+
+# Utilities
+python-dotenv>=1.0.0
+pillow>=10.0.0
+tiktoken>=0.5.0
+watchdog>=3.0.0
+loguru>=0.7.0
+redis>=5.0.0
+diskcache>=5.6.0
+
+# HTTP & API
+requests>=2.31.0
+httpx>=0.25.0
